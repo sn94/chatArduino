@@ -67,8 +67,10 @@ def recibir_mensaje():
             if not getSerialValue:
                 print("Sin datos")
             else:            
-                print("Recibido: " ,getSerialValue)
-                cargar_mensajes(getSerialValue)
+                print("Recibido: " ,type(getSerialValue))
+                
+                
+                cargar_mensajes( getSerialValue)
             #print(threading.current_thread().getName(), threading.active_count())
             time.sleep(0.1)
 
@@ -78,7 +80,7 @@ def enviar_mensaje():
     try:
         arduinoPort.write(mensaje.encode())
         txtmensaje.delete(0, len(mensaje) )
-        cargar_mensajes(mensaje)
+        cargar_mensajes("Tu: "+mensaje)
     except:
         print("El puerto COM3 no esta disponible para recibir datos")
 
