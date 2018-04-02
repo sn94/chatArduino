@@ -66,11 +66,9 @@ def recibir_mensaje():
             getSerialValue = arduinoPort.readline()
             if not getSerialValue:
                 print("Sin datos")
-            else:            
-                print("Recibido: " ,type(getSerialValue))
-                
-                
-                cargar_mensajes( getSerialValue)
+            else:
+                varr= "Recibido: "+getSerialValue.decode("utf-8")
+                cargar_mensajes( varr)
             #print(threading.current_thread().getName(), threading.active_count())
             time.sleep(0.1)
 
