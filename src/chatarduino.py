@@ -4,7 +4,7 @@
 # and open the template in the editor.
 
 
-#import serial
+import serial
 import threading
 import time
 from tkinter import *
@@ -26,37 +26,39 @@ subprocess = None
 arduinoPort=None
 
 
+    
 def iniciar_chat():
-    # Iniciando conexión serial
+    # Iniciando conexiÃ³n serial
     try:
         global arduinoPort
-        arduinoPort = serial.Serial('COM8', 9600, timeout=1)
+        arduinoPort = serial.Serial('COM3', 9600, timeout=1)
         # Reset manual del Arduino
-        arduinoPort.setDTR(False)
+        arduinoPort.setDTR(False)  
         time.sleep(0.3)
 	# Se borra cualquier data que haya quedado en el buffer
         arduinoPort.flushInput()
-        arduinoPort.setDTR()
+        arduinoPort.setDTR()  
         time.sleep(0.3)
-        print("Conectado al puerto com3!")
-        # Retardo para establecer la conexión serial
-        time.sleep(1.8)
+        print("Conectado al puerto com3!") 
+        # Retardo para establecer la conexiÃ³n serial
+        time.sleep(1.8) 
     except:
-        print("No se puede conectar al puerto serial")
+        print("No se puede conectar al puerto COM3")
+
+
 
 def terminar_chat():
     # Cerrando puerto serial
-
     global arduinoPort
     arduinoPort.close()
     print("Puerto com3 cerrado")
 
-
+    
 def tecla(event):
     if(event.char and len(event.char)==1):
         if ord(event.char) == 13:
             enviar_mensaje()
-
+    
 def recibir_mensaje():
     global arduinoPort
     if arduinoPort != None:
@@ -64,15 +66,14 @@ def recibir_mensaje():
             getSerialValue = arduinoPort.readline()
             if not getSerialValue:
                 print("Sin datos")
-            else:
+            else:            
                 print("Recibido: " ,getSerialValue)
                 cargar_mensajes(getSerialValue)
             #print(threading.current_thread().getName(), threading.active_count())
             time.sleep(0.1)
 
-
 def enviar_mensaje():
-    mensaje = txtmensaje.get()
+    mensaje = txtmensaje.get() 
     global arduinoPort
     try:
         arduinoPort.write(mensaje.encode())
@@ -80,9 +81,6 @@ def enviar_mensaje():
         cargar_mensajes(mensaje)
     except:
         print("El puerto COM3 no esta disponible para recibir datos")
-
-
-
 
 
 def crear_receiver():
@@ -93,6 +91,7 @@ def crear_receiver():
     subprocess.start()
 
 
+
 def crear_panel_titulo():
     #panel titulo
     panelTitular = Frame(tk, bg="#00796B", width="480", padx="30", pady="65")
@@ -101,55 +100,54 @@ def crear_panel_titulo():
                         font="Courier 20 bold"
                         )
     labelTitulo.pack()
-
+    
     #panel datos del puerto
     panelPuerto= Frame(panelTitular, bg="#00796B" )
-    if arduinoPort!=None:
+    if arduinoPort!=None: 
         lpuerto= Label(panelPuerto,text= "Conectado a "+arduinoPort.name)
     else:
         lpuerto= Label(panelPuerto,text= "No conectado")
-
+        
     lpuerto.pack()
-
+        
     panelPuerto.pack()
     panelTitular.pack(side="top")
-
-
-
+    
+    
+    
 def crear_panel_form():
     #panel superior
     panelTop = Frame(tk, bg="#00796B", pady="10", padx="10")
-
-    global send
     # campo de texto
     global txtmensaje
     txtmensaje = Entry(panelTop, width="20", font="Calibri 28", bd="3",
                        fg="#212121")
     txtmensaje.bind("<Key>", tecla)
     txtmensaje.pack(side="left")
-
+    
     # boton de envio
+    global send
     send = PhotoImage(file="send.png")
-    enviar = Button(panelTop, image=send,height="50", bd="0", bg="#00796B",
+    enviar = Button(panelTop, image=send, height="50", bd="0", bg="#00796B",
                     activebackground="#FFCCBC",
                     command=enviar_mensaje)
     enviar.pack(side="right")
 
     panelTop.pack(side="top")
-
-
-
+    
+    
+    
 
 def crear_panel_mensajes():
-    global panelCenter
-    panelCenter = LabelFrame(tk, bg="#FFFFFF",width=480, height=100)
+    global panelCenter 
+    panelCenter = LabelFrame(tk, bg="#FFFFFF",width=480, height=100) 
     panelCenter.pack(fill="both", expand="yes")
-
-
+    
+    
 def cargar_mensajes(arg):
     xx= Label(panelCenter, text= arg, justify="left",font="Courier 16")
-    xx.pack()
-
+    xx.pack() 
+    
 def crear_ventana():
     tk = Tk()
     tk.config(bg="#00796B")
@@ -157,11 +155,11 @@ def crear_ventana():
     tk.title("Chat de arduinos")
     crear_panel_titulo()
     crear_panel_form()
-    crear_panel_mensajes()
+    crear_panel_mensajes() 
     tk.mainloop()
     #help("modules")
-
-
+    
+    
 if __name__ == "__main__":
     iniciar_chat()
     crear_receiver()
