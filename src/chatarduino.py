@@ -7,7 +7,6 @@
 import serial
 import threading
 import time
-import string
 from tkinter import *
 
 prefijo="94"
@@ -160,12 +159,7 @@ def crear_scroll():
     mylist.pack( side = LEFT, fill = BOTH )
     scrollbar.config( command = mylist.yview )
 
-def crear_panel_mensajes():
-    global panelCenter 
-    panelCenter = LabelFrame(tk, bg="#FFFFFF",width=480, height=100) 
-    panelCenter.pack(fill="both", expand="yes")
-    
-    
+   
 def cargar_mensajes(arg):
     global mylist
     mylist.insert(END, arg)
