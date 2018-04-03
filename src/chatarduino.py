@@ -94,7 +94,7 @@ def crear_receiver():
     subprocess = threading.Thread(
                                   name="receiver",
                                   target=recibir_mensaje,
-                                  daemon=True)
+                                  daemon=False)
     subprocess.start()
 
 
@@ -118,6 +118,8 @@ def crear_panel_titulo():
     lpuerto.pack()
         
     panelPuerto.pack()
+    endChat= Button(panelTitular,text="cerrar",command=terminar_chat)
+    endChat.pack()
     panelTitular.pack(side="top")
     
     
