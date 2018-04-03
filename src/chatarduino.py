@@ -118,8 +118,10 @@ def crear_panel_titulo():
     lpuerto.pack()
         
     panelPuerto.pack()
+    iniChat= Button(panelTitular,text="iniciar",command=iniciar_chat)
+    iniChat.pack(side="left")
     endChat= Button(panelTitular,text="cerrar",command=terminar_chat)
-    endChat.pack()
+    endChat.pack(side="right")
     panelTitular.pack(side="top")
     
     
