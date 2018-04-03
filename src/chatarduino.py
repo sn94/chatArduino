@@ -6,8 +6,9 @@
 
 import serial
 import threading
-import time
-from tkinter import *
+import time 
+import tkinter 
+from tkinter import * 
 
 prefijo="94"
 mylist=None
@@ -17,15 +18,19 @@ tk= None
 #widgets
 txtmensaje = None
 
-send=None
-#panel de mensajes
-panelCenter= None
+#boton inicio conexion
+iniChat= None
+
+#imagen
+send=None 
+
 
 #hilo que se encarga de leer mensajes entrantes
 subprocess = None
 
 # conexion serial
 arduinoPort=None
+
 
 
     
@@ -41,19 +46,32 @@ def iniciar_chat():
         arduinoPort.flushInput()
         arduinoPort.setDTR()  
         time.sleep(0.3)
-        print("Conectado al puerto com3!") 
+        print( "Conectado al puerto com3!")
         # Retardo para establecer la conexión serial
         time.sleep(1.8) 
     except:
-        print("No se puede conectar al puerto COM3")
+        print( "No se puede conectar al puerto COM3")
+        global iniChat
+        if iniChat:
+            iniChat.config(state=NORMAL)
 
 
 
 def terminar_chat():
     # Cerrando puerto serial
     global arduinoPort
-    arduinoPort.close()
-    print("Puerto com3 cerrado")
+    if arduinoPort:
+        if arduinoPort.isOpen():
+            arduinoPort.close()
+            print("Puerto com3 cerrado")
+            global iniChat
+            iniChat.config(state=NORMAL)
+        else:
+            print("El puerto serial ya fue liberado antes")
+    else:
+        print("No se puede liberar el puerto, ni siquiera se ha establecido conexion")
+            
+    
 
     
 def tecla(event):
@@ -78,15 +96,25 @@ def recibir_mensaje():
 
 def enviar_mensaje():
     mensaje = txtmensaje.get()
-    #agregar prefijo de mensaje enviado
-    mensajeprefix= prefijo +mensaje
-    global arduinoPort
-    try:
-        arduinoPort.write(mensajeprefix.encode())
-        txtmensaje.delete(0, len(mensaje) )
-        cargar_mensajes("Tu: "+mensaje)
-    except:
-        print("El puerto COM3 no esta disponible para recibir datos")
+    if mensaje=="":
+        print("Ingrese su mensaje")
+    else:
+        global arduinoPort
+        if arduinoPort:
+            if arduinoPort.isOpen():
+                #agregar prefijo de mensaje enviado
+                mensajeprefix= prefijo +mensaje
+
+                try:
+                    arduinoPort.write(mensajeprefix.encode())
+                    txtmensaje.delete(0, len(mensaje) )
+                    cargar_mensajes("Tu: "+mensaje)
+                except:
+                    print("El puerto COM3 no esta disponible para recibir datos")
+            else:
+                print("El puerto esta cerrado")
+        else:
+            print("El puerto COM3 no esta disponible para enviar datos")
 
 
 def crear_receiver():
@@ -117,9 +145,18 @@ def crear_panel_titulo():
     lpuerto.pack()
         
     panelPuerto.pack()
-    iniChat= Button(panelTitular,text="iniciar",command=iniciar_chat)
+    
+    global iniChat
+    estadoB=DISABLED
+    if not arduinoPort: estadoB= NORMAL
+    iniChat= Button(panelTitular,text="iniciar",command=iniciar_chat,state= estadoB,
+    font="Courier 14 italic",fg="#5555ff")
     iniChat.pack(side="left")
-    endChat= Button(panelTitular,text="cerrar",command=terminar_chat)
+    
+    estadoB1= NORMAL
+    if not arduinoPort: estadoB1= DISABLED
+    endChat= Button(panelTitular,text="cerrar",command=terminar_chat,
+    font="Courier 14 italic",fg="#5555ff", state= estadoB1)
     endChat.pack(side="right")
     panelTitular.pack(side="top")
     
@@ -178,6 +215,8 @@ def crear_ventana():
     
     
 if __name__ == "__main__":
+    
+    
     iniciar_chat()
-    crear_receiver()
     crear_ventana()
+    crear_receiver()
