@@ -7,14 +7,20 @@
 import serial
 import threading
 import time 
-import tkinter 
+import tkinter   
 from tkinter import * 
 
+
+
+
 prefijo="94"
+puerto= "COM3"
+
 mylist=None
 #ventana
 tk= None
-
+#estado
+labelEstado=None
 #widgets
 txtmensaje = None
 
@@ -38,19 +44,19 @@ def iniciar_chat():
     # Iniciando conexión serial
     try:
         global arduinoPort
-        arduinoPort = serial.Serial('COM3', 9600, timeout=1)
+        global labelEstado
+        
+        arduinoPort = serial.Serial( puerto, 9600, timeout=1)
         # Reset manual del Arduino
         arduinoPort.setDTR(False)  
         time.sleep(0.3)
 	# Se borra cualquier data que haya quedado en el buffer
         arduinoPort.flushInput()
         arduinoPort.setDTR()  
-        time.sleep(0.3)
-        print( "Conectado al puerto com3!")
+        time.sleep(0.3) 
         # Retardo para establecer la conexión serial
         time.sleep(1.8) 
     except:
-        print( "No se puede conectar al puerto COM3")
         global iniChat
         if iniChat:
             iniChat.config(state=NORMAL)
@@ -60,6 +66,7 @@ def iniciar_chat():
 def terminar_chat():
     # Cerrando puerto serial
     global arduinoPort
+    global labelEstado
     if arduinoPort:
         if arduinoPort.isOpen():
             arduinoPort.close()
@@ -67,9 +74,9 @@ def terminar_chat():
             global iniChat
             iniChat.config(state=NORMAL)
         else:
-            print("El puerto serial ya fue liberado antes")
+            labelEstado.config(text= "El puerto serial ya fue liberado antes" ) 
     else:
-        print("No se puede liberar el puerto, ni siquiera se ha establecido conexion")
+        labelEstado.config(text="No se puede liberar el puerto, ni siquiera se ha establecido conexion")
             
     
 
@@ -95,13 +102,15 @@ def recibir_mensaje():
             time.sleep(0.1)
 
 def enviar_mensaje():
+    global labelEstado
     mensaje = txtmensaje.get()
-    if mensaje=="":
-        print("Ingrese su mensaje")
-    else:
-        global arduinoPort
-        if arduinoPort:
-            if arduinoPort.isOpen():
+    global arduinoPort
+    if arduinoPort:
+        if arduinoPort.isOpen():
+                
+            if mensaje=="":
+                labelEstado.config(text="Ingrese su mensaje")
+            else:
                 #agregar prefijo de mensaje enviado
                 mensajeprefix= prefijo +mensaje
 
@@ -110,11 +119,11 @@ def enviar_mensaje():
                     txtmensaje.delete(0, len(mensaje) )
                     cargar_mensajes("Tu: "+mensaje)
                 except:
-                    print("El puerto COM3 no esta disponible para recibir datos")
-            else:
-                print("El puerto esta cerrado")
+                    labelEstado.config(text="El puerto COM3 no esta disponible\npara recibir datos")
         else:
-            print("El puerto COM3 no esta disponible para enviar datos")
+            labelEstado.config(text="El puerto esta cerrado")
+    else:
+        labelEstado.config(text="El puerto COM3 no esta disponible\n para enviar datos")
 
 
 def crear_receiver():
@@ -127,8 +136,22 @@ def crear_receiver():
 
 
 def crear_panel_titulo():
+
+    
     #panel titulo
     panelTitular = Frame(tk, bg="#00796B", width="480", padx="30", pady="65")
+    
+        #label del estado del programa
+    global labelEstado
+    ll= "Conectado al puerto com3!"
+    if not arduinoPort: ll=  "No se puede conectar al puerto "+puerto+"!"
+    labelEstado = Label(panelTitular, bg="#00796B", fg="#FFFFFF",
+                        text=  ll ,
+                        font="Courier 12 bold"
+                        )
+    labelEstado.pack()
+    
+    
     labelTitulo = Label(panelTitular, bg="#00796B", fg="#FFFFFF",
                         text="Simulaciones (Examen Final)\n Python y Arduino",
                         font="Courier 20 bold"
@@ -190,9 +213,6 @@ def crear_scroll():
     mylist = Listbox(tk, width=100,
     yscrollcommand=scrollbar.set,
     font="Courier 18",highlightcolor="#00ff00",selectbackground="pink",selectforeground="black")
-    #for line in range(100):
-       #mylist.insert(END, "This is line number " + str(line))
-
     mylist.pack( side = LEFT, fill = BOTH )
     scrollbar.config( command = mylist.yview )
 
