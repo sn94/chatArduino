@@ -7,8 +7,11 @@
 import serial
 import threading
 import time
+import string
 from tkinter import *
 
+prefijo="94"
+mylist=None
 #ventana
 tk= None
 
@@ -67,16 +70,20 @@ def recibir_mensaje():
             if not getSerialValue:
                 print("Sin datos")
             else:
-                varr= "Recibido: "+getSerialValue.decode("utf-8")
-                cargar_mensajes( varr)
+                strRecibido=  getSerialValue.decode("utf-8")
+                if(strRecibido[0:2]!= prefijo): #cuando no se trate de un mensaje propio
+                    varr= strRecibido[2:]
+                    cargar_mensajes( varr)
             #print(threading.current_thread().getName(), threading.active_count())
             time.sleep(0.1)
 
 def enviar_mensaje():
-    mensaje = txtmensaje.get() 
+    mensaje = txtmensaje.get()
+    #agregar prefijo de mensaje enviado
+    mensajeprefix= prefijo +mensaje
     global arduinoPort
     try:
-        arduinoPort.write(mensaje.encode())
+        arduinoPort.write(mensajeprefix.encode())
         txtmensaje.delete(0, len(mensaje) )
         cargar_mensajes("Tu: "+mensaje)
     except:
@@ -136,7 +143,18 @@ def crear_panel_form():
     panelTop.pack(side="top")
     
     
-    
+def crear_scroll():
+    scrollbar = Scrollbar(tk)
+    scrollbar.pack( side = RIGHT, fill = Y )
+    global mylist
+    mylist = Listbox(tk, width=100,
+    yscrollcommand=scrollbar.set,
+    font="Courier 18",highlightcolor="#00ff00",selectbackground="pink",selectforeground="black")
+    #for line in range(100):
+       #mylist.insert(END, "This is line number " + str(line))
+
+    mylist.pack( side = LEFT, fill = BOTH )
+    scrollbar.config( command = mylist.yview )
 
 def crear_panel_mensajes():
     global panelCenter 
@@ -145,8 +163,8 @@ def crear_panel_mensajes():
     
     
 def cargar_mensajes(arg):
-    xx= Label(panelCenter, text= arg, justify="left",font="Courier 16")
-    xx.pack() 
+    global mylist
+    mylist.insert(END, arg)
     
 def crear_ventana():
     tk = Tk()
@@ -155,7 +173,8 @@ def crear_ventana():
     tk.title("Chat de arduinos")
     crear_panel_titulo()
     crear_panel_form()
-    crear_panel_mensajes() 
+    #crear_panel_mensajes() 
+    crear_scroll()
     tk.mainloop()
     #help("modules")
     
