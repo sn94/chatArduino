@@ -96,8 +96,8 @@ def tecla(event):
     
 def recibir_mensaje():
     global arduinoPort
-    if arduinoPort != None:
-        while arduinoPort.isOpen():
+    while arduinoPort:
+        if arduinoPort.isOpen():
             getSerialValue = arduinoPort.readline()
             if not getSerialValue:
                 print("Sin datos")
@@ -107,7 +107,7 @@ def recibir_mensaje():
                     varr= strRecibido[2:]
                     cargar_mensajes( varr)
             #print(threading.current_thread().getName(), threading.active_count())
-            time.sleep(0.1)
+        time.sleep(0.1)
 
 def enviar_mensaje():
     global labelEstado
@@ -135,10 +135,11 @@ def enviar_mensaje():
 
 
 def crear_receiver():
+    global subprocess
     subprocess = threading.Thread(
                                   name="receiver",
                                   target=recibir_mensaje,
-                                  daemon=False)
+                                  daemon=True)
     subprocess.start()
 
 
@@ -248,5 +249,5 @@ if __name__ == "__main__":
     
     
     iniciar_chat()
-    crear_ventana()
     crear_receiver()
+    crear_ventana()
