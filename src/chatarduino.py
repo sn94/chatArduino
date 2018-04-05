@@ -21,19 +21,16 @@ mylist=None
 tk= None
 #estado
 labelEstado=None
+lpuerto= None
 #widgets
 txtmensaje = None
-
 #boton inicio conexion
 iniChat= None
-
+endChat=None
 #imagen
 send=None 
-
-
 #hilo que se encarga de leer mensajes entrantes
 subprocess = None
-
 # conexion serial
 arduinoPort=None
 
@@ -42,10 +39,11 @@ arduinoPort=None
     
 def iniciar_chat():
     # Iniciando conexión serial
+    global iniChat
+    global endChat
     try:
         global arduinoPort
         global labelEstado
-        
         arduinoPort = serial.Serial( puerto, 9600, timeout=1)
         # Reset manual del Arduino
         arduinoPort.setDTR(False)  
@@ -56,10 +54,15 @@ def iniciar_chat():
         time.sleep(0.3) 
         # Retardo para establecer la conexión serial
         time.sleep(1.8) 
+        labelEstado.config(text="Conexion establecida!", bg= "#00796B")
+        global lpuerto
+        if lpuerto:
+                lpuerto.config(text="Conectado a "+puerto)
+        if iniChat: iniChat.config(state=DISABLED)
+        if endChat: endChat.config(state=NORMAL)
     except:
-        global iniChat
-        if iniChat:
-            iniChat.config(state=NORMAL)
+        if iniChat: iniChat.config(state=NORMAL)
+        if endChat: endChat.config(state=DISABLED)
 
 
 
@@ -70,13 +73,18 @@ def terminar_chat():
     if arduinoPort:
         if arduinoPort.isOpen():
             arduinoPort.close()
-            print("Puerto com3 cerrado")
+            labelEstado.config(text="Puerto com3 cerrado" , bg="#00796B")
             global iniChat
             iniChat.config(state=NORMAL)
+            global endChat
+            endChat.config(state=DISABLED)
+            global lpuerto
+            lpuerto.config(text="No conectado")
         else:
-            labelEstado.config(text= "El puerto serial ya fue liberado antes" ) 
+            labelEstado.config(text= "El puerto serial ya fue liberado antes", bg="#00796B" ) 
     else:
-        labelEstado.config(text="No se puede liberar el puerto, ni siquiera se ha establecido conexion")
+        labelEstado.config(
+        text="No se puede liberar el puerto, ni siquiera se ha establecido conexion", bg="#00796B")
             
     
 
@@ -109,21 +117,21 @@ def enviar_mensaje():
         if arduinoPort.isOpen():
                 
             if mensaje=="":
-                labelEstado.config(text="Ingrese su mensaje")
+                labelEstado.config(text="Ingrese su mensaje", bg="red")
             else:
                 #agregar prefijo de mensaje enviado
                 mensajeprefix= prefijo +mensaje
-
+                labelEstado.config(text="Listo. ",bg="#00796B")
                 try:
                     arduinoPort.write(mensajeprefix.encode())
                     txtmensaje.delete(0, len(mensaje) )
                     cargar_mensajes("Tu: "+mensaje)
                 except:
-                    labelEstado.config(text="El puerto COM3 no esta disponible\npara recibir datos")
+                    labelEstado.config(text="El puerto COM3 no esta disponible\npara recibir datos", bg="#00796B" )
         else:
-            labelEstado.config(text="El puerto esta cerrado")
+            labelEstado.config(text="El puerto esta cerrado", bg="#00796B")
     else:
-        labelEstado.config(text="El puerto COM3 no esta disponible\n para enviar datos")
+        labelEstado.config(text="El puerto COM3 no esta disponible\n para enviar datos", bg="#00796B")
 
 
 def crear_receiver():
@@ -143,7 +151,7 @@ def crear_panel_titulo():
     
         #label del estado del programa
     global labelEstado
-    ll= "Conectado al puerto com3!"
+    ll= "Conexion establecida!"
     if not arduinoPort: ll=  "No se puede conectar al puerto "+puerto+"!"
     labelEstado = Label(panelTitular, bg="#00796B", fg="#FFFFFF",
                         text=  ll ,
@@ -159,6 +167,7 @@ def crear_panel_titulo():
     labelTitulo.pack()
     
     #panel datos del puerto
+    global lpuerto
     panelPuerto= Frame(panelTitular, bg="#00796B" )
     if arduinoPort!=None: 
         lpuerto= Label(panelPuerto,text= "Conectado a "+arduinoPort.name)
@@ -176,6 +185,7 @@ def crear_panel_titulo():
     font="Courier 14 italic",fg="#5555ff")
     iniChat.pack(side="left")
     
+    global endChat
     estadoB1= NORMAL
     if not arduinoPort: estadoB1= DISABLED
     endChat= Button(panelTitular,text="cerrar",command=terminar_chat,
