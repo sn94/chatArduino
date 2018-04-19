@@ -43,17 +43,17 @@ def iniciar_chat():
     global endChat
     try:
         global arduinoPort
+        
         global labelEstado
         arduinoPort = serial.Serial( puerto, 9600, timeout=1)
         # Reset manual del Arduino
-        arduinoPort.setDTR(False)  
+        #arduinoPort.setDTR(False)  
         time.sleep(0.3)
 	# Se borra cualquier data que haya quedado en el buffer
         arduinoPort.flushInput()
-        arduinoPort.setDTR()  
-        time.sleep(0.3) 
+        arduinoPort.setDTR()
         # Retardo para establecer la conexión serial
-        time.sleep(1.8) 
+        time.sleep(2.1) 
         labelEstado.config(text="Conexion establecida!", bg= "#00796B")
         global lpuerto
         if lpuerto:
@@ -102,9 +102,12 @@ def recibir_mensaje():
             if not getSerialValue:
                 print("Sin datos")
             else:
+                
                 strRecibido=  getSerialValue.decode("utf-8")
+                #print( strRecibido )
                 if(strRecibido[0:2]!= prefijo): #cuando no se trate de un mensaje propio
-                    varr= strRecibido[2:]
+                    #trRecibido[2:]=""
+                    varr= "@Machelo: "+ strRecibido[2:]
                     cargar_mensajes( varr)
             #print(threading.current_thread().getName(), threading.active_count())
         time.sleep(0.1)
@@ -125,7 +128,7 @@ def enviar_mensaje():
                 try:
                     arduinoPort.write(mensajeprefix.encode())
                     txtmensaje.delete(0, len(mensaje) )
-                    cargar_mensajes("Tu: "+mensaje)
+                    cargar_mensajes("Sonia: "+mensaje)
                 except:
                     labelEstado.config(text="El puerto COM3 no esta disponible\npara recibir datos", bg="#00796B" )
         else:
